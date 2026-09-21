@@ -4,7 +4,7 @@ export PROFILE=docker
 export PREFIX="${IMAGE_PREFIX}"
 
 docker compose down
-docker_containers=$(docker ps -a -q)
+docker_containers=$(docker ps -a --format '{{.ID}} {{.Names}}' | grep -Ev 'niffler-all|zookeeper|kafka' | awk '{print $1}')
 docker_images=$(docker images --format '{{.Repository}}:{{.Tag}}' | grep 'niffler')
 
 if [ ! -z "$docker_containers" ]; then

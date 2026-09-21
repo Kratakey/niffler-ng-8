@@ -114,6 +114,13 @@ User-MacBook-Pro  niffler % bash localenv.sh
 ```posh
 docker run --name niffler-all -p 5432:5432 -e POSTGRES_PASSWORD=secret -e CREATE_DATABASES=niffler-auth,niffler-currency,niffler-spend,niffler-userdata -e TZ=GMT+3 -e PGTZ=GMT+3 -v pgdata:/var/lib/postgresql/data -v ./postgres/script:/docker-entrypoint-initdb.d -d postgres:15.1 --max_prepared_transactions=100
 
+```
+Для Windows (не переводить Unix пути в Windows-пути):
+```posh
+MSYS_NO_PATHCONV=1 docker run --name niffler-all -p 5432:5432 -e POSTGRES_PASSWORD=secret -e CREATE_DATABASES=niffler-auth,niffler-currency,niffler-spend,niffler-userdata -e TZ=GMT+3 -e PGTZ=GMT+3 -v pgdata:/var/lib/postgresql/data -v ./postgres/script:/docker-entrypoint-initdb.d -d postgres:15.1 --max_prepared_transactions=100
+
+```
+```posh
 docker run --name=zookeeper -e ZOOKEEPER_CLIENT_PORT=2181 -p 2181:2181 -d confluentinc/cp-zookeeper:7.3.2
 
 docker run --name=kafka -e KAFKA_BROKER_ID=1 \
@@ -133,6 +140,13 @@ docker run --name niffler-all -p 5432:5432 -e POSTGRES_PASSWORD=secret -e CREATE
 docker run --name=zookeeper -e ZOOKEEPER_CLIENT_PORT=2181 -p 2181:2181 -d confluentinc/cp-zookeeper:7.3.2
 
 docker run --name=kafka -e KAFKA_BROKER_ID=1 -e KAFKA_ZOOKEEPER_CONNECT=$(docker inspect zookeeper --format="{{ .NetworkSettings.IPAddress }}"):2181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 -e KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1 -e KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1 -p 9092:9092 -d confluentinc/cp-kafka:7.3.2
+docker run --name=kafka -e KAFKA_BROKER_ID=1 \
+-e KAFKA_ZOOKEEPER_CONNECT=$(docker inspect zookeeper --format='{{ .NetworkSettings.Networks.bridge.IPAddress }}'):2181 \
+-e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 \
+-e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
+-e KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1 \
+-e KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1 \
+-p 9092:9092 -d confluentinc/cp-kafka:7.3.2
 ```
 
 [Про IP zookeeper](https://github.com/confluentinc/cp-docker-images/issues/801#issuecomment-692085103)
@@ -218,7 +232,7 @@ User-MacBook-Pro niffler-auth % gradle bootRun --args='--spring.profiles.active=
 ```posh
 FATAL: database "niffler-auth" does not exist
 ```
-то необходимо проверить, было ли сообщение об автоматическом создании баз данныхз в логе контейнера с Postgres (niffler-all):
+то необходимо проверить, было ли сообщение об автоматическом создании баз данных в логе контейнера с Postgres (niffler-all):
 ```posh
 docker logs -f niffler-all
 ... 
@@ -258,7 +272,7 @@ WSDL сервиса niffler-userdata доступен по адресу: http://
 - auth:      127.0.0.1 auth.niffler.dc
 - gateway:   127.0.0.1 gateway.niffler.dc
 
-```posh
+```poshё
 User-MacBook-Pro niffler % vi /etc/hosts
 ```
 
